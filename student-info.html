@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生信息</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f6f8ff, #e9edff, #dce3ff);
+            min-height: 100vh;
+            color: #2c3e50;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(147, 197, 253, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(167, 139, 250, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: backgroundPulse 10s ease infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            padding: 12px 24px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, #60a5fa, #7c3aed);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+            background: linear-gradient(135deg, #7c3aed, #60a5fa);
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(124, 58, 237, 0.15);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+        }
+
+        .student-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .student-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #7c3aed;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+            transition: all 0.3s;
+        }
+
+        .student-card:hover .student-avatar {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+        }
+
+        .student-name {
+            font-size: 1.3em;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .student-id {
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+        .student-info {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: rgba(124, 58, 237, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .info-item:hover {
+            background: rgba(124, 58, 237, 0.1);
+            transform: translateX(5px);
+        }
+
+        .info-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .student-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #60a5fa, #7c3aed);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 0.9em;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+            background: linear-gradient(135deg, #7c3aed, #60a5fa);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        .delete-btn:hover {
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: modalFade 0.3s ease-out;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            padding: 30px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 800px;
+            color: #333;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-content:hover {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .modal-header h2 {
+            color: #1e1e3f;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #ff5252;
+            transform: rotate(90deg);
+        }
+
+        .scores-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .scores-table th,
+        .scores-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .scores-table th {
+            background: linear-gradient(135deg, #3eb8ff, #9333ea);
+            color: white;
+            font-weight: 600;
+            letter-spacing: 1px;
+            font-size: 0.95em;
+            text-transform: uppercase;
+        }
+
+        .scores-table tr:nth-child(even) {
+            background: rgba(147, 51, 234, 0.05);
+        }
+
+        .scores-table tr:hover {
+            background: rgba(62, 184, 255, 0.1);
+        }
+
+        .score-cell {
+            position: relative;
+            padding-right: 30px !important;
+        }
+
+        .score-trend {
+            font-size: 14px;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: all 0.3s;
+        }
+
+        .trend-up {
+            color: #4CAF50;
+        }
+
+        .trend-up:hover {
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        .trend-down {
+            color: #ff5252;
+        }
+
+        .trend-down:hover {
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        .chart-container {
+            margin-top: 30px;
+            height: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 1024px) {
+            .student-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .student-table th,
+            .student-table td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+
+            .scores-table th,
+            .scores-table td {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">返回</button>
+            <h1>学生信息</h1>
+        </div>
+
+        <div class="student-grid">
+            <!-- 学生卡片将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 成绩详情模态框 -->
+    <div class="modal" id="scoresModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>学生成绩详情</h2>
+                <button class="close-btn" onclick="hideScoresModal()">&times;</button>
+            </div>
+            <div id="scoresContent">
+                <!-- 成绩信息将通过JavaScript动态生成 -->
+            </div>
+            <div class="chart-container" id="scoreChart">
+                <!-- 成绩趋势图将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 模拟学生数据
+        const students = [
+            {
+                id: "2024001",
+                name: "张三",
+                age: 16,
+                birthDate: "2008-05-15",
+                class: "高一(3)班",
+                scores: {
+                    语文: [85, 88, 92],
+                    数学: [95, 92, 90],
+                    英语: [88, 85, 89],
+                    物理: [92, 90, 93],
+                    化学: [87, 89, 88],
+                    生物: [90, 92, 91],
+                    历史: [85, 87, 86],
+                    地理: [88, 90, 89],
+                    政治: [92, 90, 91]
+                }
+            },
+            {
+                id: "2024002",
+                name: "李四",
+                age: 15,
+                birthDate: "2009-03-20",
+                class: "高一(2)班",
+                scores: {
+                    语文: [90, 92, 88],
+                    数学: [88, 85, 87],
+                    英语: [92, 90, 93],
+                    物理: [85, 88, 86],
+                    化学: [89, 91, 90],
+                    生物: [87, 85, 88],
+                    历史: [90, 92, 91],
+                    地理: [86, 88, 87],
+                    政治: [88, 90, 89]
+                }
+            },
+            {
+                id: "2024003",
+                name: "王五",
+                age: 16,
+                birthDate: "2008-09-10",
+                class: "高一(1)班",
+                scores: {
+                    语文: [92, 90, 94],
+                    数学: [88, 92, 90],
+                    英语: [85, 87, 86],
+                    物理: [90, 88, 91],
+                    化学: [86, 88, 87],
+                    生物: [89, 91, 90],
+                    历史: [87, 85, 88],
+                    地理: [91, 93, 92],
+                    政治: [88, 90, 89]
+                }
+            },
+            {
+                id: "2024004",
+                name: "赵六",
+                age: 15,
+                birthDate: "2009-07-25",
+                class: "高一(2)班",
+                scores: {
+                    语文: [88, 90, 89],
+                    数学: [92, 94, 93],
+                    英语: [85, 87, 86],
+                    物理: [89, 91, 90],
+                    化学: [87, 85, 88],
+                    生物: [90, 92, 91],
+                    历史: [86, 88, 87],
+                    地理: [88, 90, 89],
+                    政治: [91, 93, 92]
+                }
+            },
+            {
+                id: "2024005",
+                name: "孙七",
+                age: 16,
+                birthDate: "2008-11-30",
+                class: "高一(3)班",
+                scores: {
+                    语文: [90, 92, 91],
+                    数学: [87, 85, 88],
+                    英语: [92, 94, 93],
+                    物理: [88, 90, 89],
+                    化学: [85, 87, 86],
+                    生物: [89, 91, 90],
+                    历史: [91, 93, 92],
+                    地理: [86, 88, 87],
+                    政治: [88, 90, 89]
+                }
+            }
+        ];
+
+        // 渲染学生列表
+        function renderStudentList() {
+            const studentGrid = document.querySelector('.student-grid');
+            studentGrid.innerHTML = students.map(student => `
+                <div class="student-card">
+                    <div class="student-header">
+                        <div class="student-avatar">
+                            <img src="avatar.jpg" alt="Student Avatar">
+                        </div>
+                        <div class="student-info">
+                            <h3 class="student-name">${student.name}</h3>
+                            <p class="student-id">${student.id}</p>
+                        </div>
+                    </div>
+                    <div class="student-actions">
+                        <button class="action-btn">查看成绩</button>
+                        <button class="action-btn delete-btn">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 显示成绩模态框
+        function showScores(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            const modal = document.getElementById('scoresModal');
+            const content = document.getElementById('scoresContent');
+
+            // 生成成绩表格
+            let tableHTML = `
+                <table class="scores-table">
+                    <thead>
+                        <tr>
+                            <th>科目</th>
+                            <th>第一次</th>
+                            <th>第二次</th>
+                            <th>第三次</th>
+                            <th>平均分</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (const [subject, scores] of Object.entries(student.scores)) {
+                const avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+                const trend = scores[scores.length - 1] > scores[scores.length - 2] ? 
+                    '<span class="score-trend trend-up">↑</span>' : 
+                    '<span class="score-trend trend-down">↓</span>';
+                
+                tableHTML += `
+                    <tr>
+                        <td>${subject}</td>
+                        <td>${scores[0]}</td>
+                        <td>${scores[1]}</td>
+                        <td class="score-cell">${scores[2]}${trend}</td>
+                        <td>${avg}</td>
+                    </tr>
+                `;
+            }
+
+            tableHTML += '</tbody></table>';
+            content.innerHTML = tableHTML;
+
+            // 创建成绩趋势图
+            createScoreChart(student);
+
+            modal.style.display = 'flex';
+        }
+
+        // 隐藏成绩模态框
+        function hideScoresModal() {
+            document.getElementById('scoresModal').style.display = 'none';
+        }
+
+        // 创建成绩趋势图
+        function createScoreChart(student) {
+            const ctx = document.getElementById('scoreChart');
+            
+            // 如果已存在图表，先销毁
+            if (window.scoreChart) {
+                window.scoreChart.destroy();
+            }
+
+            const subjects = Object.keys(student.scores);
+            const datasets = subjects.map((subject, index) => ({
+                label: subject,
+                data: student.scores[subject],
+                borderColor: getRandomColor(),
+                fill: false
+            }));
+
+            window.scoreChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['第一次', '第二次', '第三次'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // 生成随机颜色
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // 初始化显示
+        renderStudentList();
+    </script>
+</body>
+</html> 

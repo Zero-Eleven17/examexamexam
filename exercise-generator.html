@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI练习题生成</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff, #e4eaff, #d8e0ff);
+            min-height: 100vh;
+            color: #2c3e50;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(100, 149, 237, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(147, 112, 219, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: backgroundShift 15s ease infinite;
+        }
+
+        @keyframes backgroundShift {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            animation: fadeIn 0.6s ease-out;
+            will-change: transform, opacity;
+            transform: translateZ(0);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        .back-btn {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            will-change: transform;
+            transform: translateZ(0);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .ai-avatar {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            will-change: transform;
+            transform: translateZ(0);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .ai-image {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s ease;
+            will-change: transform;
+            animation: aiGlow 3s infinite alternate;
+        }
+
+        @keyframes aiGlow {
+            from { box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+            to { box-shadow: 0 0 30px rgba(255, 0, 255, 0.3); }
+        }
+
+        .chat-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            order: 1;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        .chat-input {
+            order: 2;
+            margin-top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        .chat-input input {
+            color: #333;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+        }
+
+        .generated-exercises {
+            order: 0;
+            margin-top: 0;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        .message {
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            max-width: 85%;
+        }
+
+        .message.ai {
+            background: linear-gradient(135deg, #f0f4ff, #e4eaff);
+            color: #333;
+            margin-right: auto;
+            border-top-left-radius: 5px;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #3eb8ff, #384fff);
+            color: #fff;
+            margin-left: auto;
+            border-top-right-radius: 5px;
+            text-align: left;
+        }
+
+        .send-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #00ffff, #ff00ff);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            will-change: transform;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .exercise-item {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .exercise-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .exercise-item label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .save-exercises {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #00ff00, #00ffff);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            will-change: transform;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 优化粒子效果 */
+        .particle {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 20s infinite linear;
+            opacity: 0.3;
+            will-change: transform, opacity;
+        }
+
+        @keyframes particleFloat {
+            0% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-50vh) rotate(180deg);
+                opacity: 0.4;
+            }
+            100% { 
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        /* 添加文件预览模态框样式 */
+        .file-preview-modal {
+            backdrop-filter: blur(10px);
+        }
+
+        .file-preview-content {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .file-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .file-preview-header input {
+            font-size: 24px;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 50%;
+        }
+
+        .file-preview-close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .exercise-list {
+            margin-top: 20px;
+        }
+
+        .exercise-item .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+
+        .exercise-item .content {
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .exercise-item .answer {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">返回</button>
+            <h1>AI练习题生成器</h1>
+        </div>
+
+        <div class="ai-avatar">
+            <img src="img/ai机器人1.jpg" alt="AI老师" class="ai-image">
+            <h2>你好！我是出题老师</h2>
+            <p>请告诉我你需要什么样的练习题～</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai">
+                    你好！我可以帮你生成各个年级、各个科目的练习题。请告诉我你需要：
+                    1. 哪个年级的题目
+                    2. 哪个科目
+                    3. 需要多少道题目
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" placeholder="例如：请生成高一数学函数与导数相关的5道题" id="userInput">
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                    发送
+                </button>
+            </div>
+
+            <div class="generated-exercises" id="generatedExercises" style="display: none;">
+                <h3>已生成的练习题</h3>
+                <div id="exercisesList"></div>
+                <div class="save-exercises">
+                    <button class="save-btn" onclick="saveToExercises()">保存到练习题</button>
+                    <button class="save-btn" onclick="saveToStorage()">保存到备课存储</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 习题文件预览模态框 -->
+    <div class="file-preview-modal" id="filePreviewModal">
+        <div class="file-preview-content">
+            <div class="file-preview-header">
+                <input type="text" id="fileName" placeholder="输入习题文件名称">
+                <span class="file-preview-close" onclick="closeFilePreview()">&times;</span>
+            </div>
+            <div class="exercise-list" id="exerciseList">
+                <!-- 习题内容将在这里显示 -->
+            </div>
+            <div class="modal-buttons">
+                <button class="save-btn" onclick="saveToExercises()">保存到练习题</button>
+                <button class="save-btn" onclick="saveToStorage()">保存到备课存储</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建粒子效果
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // 初始化粒子
+        createParticles();
+
+        let exercises = [];
+        const API_URL = "https://api.deepseek.com/chat/completions";
+        const API_KEY = "sk-f9889eebce674f768a2730d9eedce593";
+        const MODEL_NAME = "deepseek-chat";
+
+        function addMessage(message, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            input.value = '';
+
+            // 显示AI思考中的消息
+            addMessage('思考中...');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'X-DeepSeek-API-Version': '2024-03'
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: [
+                            {
+                                role: 'system',
+                                content: `你是一个专业的出题老师，请根据用户的要求生成对应的练习题。
+                                要求：
+                                1. 每道题目都要包含完整的题目描述和答案
+                                2. 题目难度要符合对应年级水平
+                                3. 答案要详细解释解题思路
+                                4. 每道题目用序号标注，格式为：
+                                   题目X：[题目内容]
+                                   答案：[答案内容]
+                                   解析：[解题思路]
+                                5. 如果用户没有指定题目数量，默认生成5道题`
+                            },
+                            {role: 'user', content: message}
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`API请求失败: ${response.status} - ${errorData.error?.message || '未知错误'}`);
+                }
+
+                const data = await response.json();
+                if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                    throw new Error('API返回数据格式错误');
+                }
+
+                const generatedExercises = data.choices[0].message.content;
+
+                // 移除"思考中..."消息
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.removeChild(chatMessages.lastChild);
+
+                // 显示生成的练习题
+                addMessage('已为您生成以下练习题：');
+                addMessage(generatedExercises);
+                displayExercises(generatedExercises);
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('抱歉，生成题目时出现错误：' + error.message);
+            }
+        }
+
+        function displayExercises(exercisesText) {
+            showFilePreview(exercisesText);
+        }
+
+        function showFilePreview(exercisesText) {
+            document.getElementById('filePreviewModal').style.display = 'block';
+            document.getElementById('fileName').value = '习题集_' + new Date().toLocaleDateString();
+            
+            const exercisesList = document.getElementById('exerciseList');
+            exercises = exercisesText.split('\n\n').filter(e => e.trim());
+            
+            exercisesList.innerHTML = exercises.map((exercise, index) => `
+                <div class="exercise-item">
+                    <div class="title">习题 ${index + 1}</div>
+                    <div class="content">${exercise.split('\n').map(line => {
+                        if (line.startsWith('题目')) return `<strong>${line}</strong>`;
+                        if (line.startsWith('答案')) return `<div class="answer"><strong>${line}</strong>`;
+                        if (line.startsWith('解析')) return `<div class="analysis"><strong>${line}</strong>`;
+                        return line;
+                    }).join('<br>')}</div>
+                </div>
+            `).join('');
+        }
+
+        function closeFilePreview() {
+            document.getElementById('filePreviewModal').style.display = 'none';
+        }
+
+        function saveToExercises() {
+            const fileName = document.getElementById('fileName').value;
+            let existingExercises = JSON.parse(localStorage.getItem('exercises')) || [];
+            const newExercises = exercises.map(content => ({
+                id: Date.now() + Math.random(),
+                title: fileName,
+                content: content,
+                grade: '待分类',
+                subject: '待分类',
+                timestamp: new Date().toISOString(),
+                isCompleted: false
+            }));
+            existingExercises = existingExercises.concat(newExercises);
+            localStorage.setItem('exercises', JSON.stringify(existingExercises));
+            alert('已成功保存到练习题！');
+            closeFilePreview();
+        }
+
+        function saveToStorage() {
+            const fileName = document.getElementById('fileName').value;
+            let lessonFolders = JSON.parse(localStorage.getItem('lessonFolders')) || [];
+            const newFolder = {
+                id: Date.now(),
+                name: fileName,
+                createDate: new Date().toISOString().split('T')[0],
+                files: exercises.length,
+                content: exercises
+            };
+            lessonFolders.push(newFolder);
+            localStorage.setItem('lessonFolders', JSON.stringify(lessonFolders));
+            alert('已成功保存到备课存储！');
+            closeFilePreview();
+        }
+
+        // 添加回车发送功能
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html> 

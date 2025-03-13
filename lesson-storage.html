@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备课存储</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f6f8ff, #e9edff, #dce3ff);
+            min-height: 100vh;
+            color: #2c3e50;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(147, 197, 253, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(167, 139, 250, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: backgroundPulse 10s ease infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            padding: 12px 24px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, #60a5fa, #7c3aed);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+            background: linear-gradient(135deg, #7c3aed, #60a5fa);
+        }
+
+        .add-btn {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(135deg, #3eb8ff, #9333ea);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #9333ea, #3eb8ff);
+        }
+
+        .folders-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .folder {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .folder:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+        }
+
+        .folder-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .folder:hover .folder-icon {
+            transform: scale(1.1);
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.3));
+        }
+
+        .folder-name {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #3eb8ff;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .folder-meta {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff5252, #ff1a1a);
+            color: white;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .folder:hover .delete-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: modalFade 0.3s ease-out;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(124, 58, 237, 0.2);
+            border-radius: 12px;
+            background: white;
+            color: #2c3e50;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .breadcrumb {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .breadcrumb a {
+            color: #3eb8ff;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            color: #9333ea;
+            text-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+        }
+
+        .breadcrumb span {
+            margin: 0 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 1024px) {
+            .folders-container {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .folders-container {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                padding: 15px;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">返回</button>
+            <h1>备课存储</h1>
+            <button class="add-btn" onclick="showAddModal()">+ 新建文件夹</button>
+        </div>
+
+        <div class="breadcrumb" id="breadcrumb">
+            <!-- 面包屑导航将通过JavaScript动态生成 -->
+        </div>
+
+        <div class="folders-container" id="foldersContainer">
+            <!-- 文件夹将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 添加文件夹的模态框 -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新建文件夹</h2>
+                <button class="close-btn" onclick="hideAddModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>文件夹名称</label>
+                <input type="text" id="folderName" placeholder="请输入文件夹名称">
+            </div>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="hideAddModal()">取消</button>
+                <button class="save-btn" onclick="saveFolder()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 存储文件夹数据
+        let folders = JSON.parse(localStorage.getItem('lessonFolders')) || [
+            {
+                id: 1,
+                name: "语文备课",
+                createDate: "2024-03-15",
+                files: 5
+            },
+            {
+                id: 2,
+                name: "数学备课",
+                createDate: "2024-03-14",
+                files: 3
+            },
+            {
+                id: 3,
+                name: "英语备课",
+                createDate: "2024-03-13",
+                files: 7
+            }
+        ];
+
+        let currentPath = [];
+
+        // 渲染面包屑导航
+        function renderBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            let html = '<a href="#" onclick="navigateTo([])">根目录</a>';
+            
+            currentPath.forEach((folder, index) => {
+                html += `<span>/</span><a href="#" onclick="navigateTo(currentPath.slice(0, ${index + 1}))">${folder.name}</a>`;
+            });
+
+            breadcrumb.innerHTML = html;
+        }
+
+        // 导航到指定路径
+        function navigateTo(path) {                
+            currentPath = path;    
+            renderBreadcrumb();
+            renderFolders();
+        }
+
+        // 渲染文件夹列表
+        function renderFolders() {
+            const container = document.getElementById('foldersContainer');
+            container.innerHTML = folders.map(folder => `
+                <div class="folder" onclick="openFolder(${folder.id})">
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteFolder(${folder.id})">×</button>
+                    <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="文件夹" class="folder-icon">
+                    <div class="folder-name">${folder.name}</div>
+                    <div class="folder-meta">
+                        <div>创建时间：${folder.createDate}</div>
+                        <div>文件数量：${folder.files}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 显示添加文件夹模态框
+        function showAddModal() {
+            document.getElementById('addModal').style.display = 'flex';
+        }
+
+        // 隐藏添加文件夹模态框
+        function hideAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('folderName').value = '';
+        }
+
+        // 保存文件夹
+        function saveFolder() {
+            const name = document.getElementById('folderName').value.trim();
+            if (!name) {
+                alert('请输入文件夹名称');
+                return;
+            }
+
+            const newFolder = {
+                id: Date.now(),
+                name: name,
+                createDate: new Date().toISOString().split('T')[0],
+                files: 0
+            };
+
+            folders.push(newFolder);
+            localStorage.setItem('lessonFolders', JSON.stringify(folders));
+            hideAddModal();
+            renderFolders();
+        }
+
+        // 删除文件夹
+        function deleteFolder(id) {
+            if (confirm('确定要删除这个文件夹吗？')) {
+                folders = folders.filter(folder => folder.id !== id);
+                localStorage.setItem('lessonFolders', JSON.stringify(folders));
+                renderFolders();
+            }
+        }
+
+        // 打开文件夹
+        function openFolder(id) {
+            const folder = folders.find(f => f.id === id);
+            if (folder) {
+                currentPath.push(folder);
+                renderBreadcrumb();
+                // 这里可以加载文件夹内容
+                alert(`打开文件夹：${folder.name}\n这里可以显示文件夹内容`);
+            }
+        }
+
+        // 初始化显示
+        renderBreadcrumb();
+        renderFolders();
+    </script>
+</body>
+</html> 

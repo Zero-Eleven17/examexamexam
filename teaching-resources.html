@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教学资源</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f6f8ff, #e9edff, #dce3ff);
+            min-height: 100vh;
+            color: #2c3e50;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(147, 197, 253, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(167, 139, 250, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: backgroundPulse 10s ease infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            padding: 12px 24px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, #60a5fa, #7c3aed);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+            background: linear-gradient(135deg, #7c3aed, #60a5fa);
+        }
+
+        .add-btn {
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: none;
+            background: linear-gradient(135deg, #3eb8ff, #9333ea);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #9333ea, #3eb8ff);
+        }
+
+        .search-form {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-right: 50px;
+            border: 2px solid rgba(124, 58, 237, 0.2);
+            border-radius: 16px;
+            background: white;
+            color: #2c3e50;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: #7c3aed;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            color: #60a5fa;
+        }
+
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(124, 58, 237, 0.15);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+        }
+
+        .resource-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            color: #7c3aed;
+            transition: all 0.3s;
+        }
+
+        .resource-card:hover .resource-icon {
+            transform: scale(1.1) rotate(5deg);
+            color: #60a5fa;
+        }
+
+        .resource-title {
+            font-size: 1.2em;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .resource-description {
+            color: #64748b;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .resource-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(124, 58, 237, 0.1);
+        }
+
+        .resource-type {
+            padding: 5px 12px;
+            background: rgba(124, 58, 237, 0.1);
+            color: #7c3aed;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .resource-date {
+            color: #64748b;
+            font-size: 0.85em;
+        }
+
+        .resource-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #60a5fa, #7c3aed);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 0.9em;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+            background: linear-gradient(135deg, #7c3aed, #60a5fa);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        }
+
+        .delete-btn:hover {
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: modalFade 0.3s ease-out;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            padding: 30px;
+            border-radius: 20px;
+            width: 500px;
+            color: #333;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-content:hover {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(147, 51, 234, 0.2);
+        }
+
+        .modal-header h2 {
+            color: #1e1e3f;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #ff5252;
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e1e3f;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(147, 51, 234, 0.2);
+            border-radius: 10px;
+            background: white;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #9333ea;
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #3eb8ff, #9333ea);
+            color: white;
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4);
+        }
+
+        .cancel-btn {
+            background: linear-gradient(135deg, #ff5252, #ff1a1a);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
+        }
+
+        .cancel-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 82, 82, 0.4);
+        }
+
+        @media (max-width: 1024px) {
+            .search-form {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .search-left {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .search-right {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            select {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .resources-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">返回</button>
+            <h1>教学资源</h1>
+            <div class="user-info">
+                <span class="user-name">欢迎，<span id="teacherName">老师</span></span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+            <button class="add-btn" onclick="showAddModal()">+ 添加资源</button>
+        </div>
+
+        <div class="search-form">
+            <div class="search-left">
+                <select id="gradeSelect" onchange="filterResources()">
+                    <option value="">选择年级</option>
+                    <optgroup label="小学">
+                        <option value="小学一年级">一年级</option>
+                        <option value="小学二年级">二年级</option>
+                        <option value="小学三年级">三年级</option>
+                        <option value="小学四年级">四年级</option>
+                        <option value="小学五年级">五年级</option>
+                        <option value="小学六年级">六年级</option>
+                    </optgroup>
+                    <optgroup label="初中">
+                        <option value="初中一年级">初一</option>
+                        <option value="初中二年级">初二</option>
+                        <option value="初中三年级">初三</option>
+                    </optgroup>
+                    <optgroup label="高中">
+                        <option value="高中一年级">高一</option>
+                        <option value="高中二年级">高二</option>
+                        <option value="高中三年级">高三</option>
+                    </optgroup>
+                </select>
+                <select id="subjectSelect" onchange="filterResources()">
+                    <option value="">选择科目</option>
+                    <option value="语文">语文</option>
+                    <option value="数学">数学</option>
+                    <option value="英语">英语</option>
+                    <option value="物理">物理</option>
+                    <option value="化学">化学</option>
+                    <option value="生物">生物</option>
+                    <option value="历史">历史</option>
+                    <option value="地理">地理</option>
+                    <option value="政治">政治</option>
+                </select>
+                <select id="typeSelect" onchange="filterResources()">
+                    <option value="">资源类型</option>
+                    <option value="视频">教学视频</option>
+                    <option value="PPT">课件PPT</option>
+                    <option value="文档">教案文档</option>
+                    <option value="习题">练习题</option>
+                </select>
+            </div>
+            <div class="search-right">
+                <button class="search-btn" onclick="filterResources()">查询</button>
+                <button class="clear-btn" onclick="clearFilters()">清空</button>
+            </div>
+        </div>
+
+        <div class="resources-grid" id="resourcesGrid">
+            <!-- 资源将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 添加资源的模态框 -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加教学资源</h2>
+                <button class="close-btn" onclick="hideAddModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>资源标题</label>
+                <input type="text" id="resourceTitle">
+            </div>
+            <div class="form-group">
+                <label>年级</label>
+                <select id="resourceGrade">
+                    <option value="">选择年级</option>
+                    <optgroup label="小学">
+                        <option value="小学一年级">一年级</option>
+                        <option value="小学二年级">二年级</option>
+                        <option value="小学三年级">三年级</option>
+                        <option value="小学四年级">四年级</option>
+                        <option value="小学五年级">五年级</option>
+                        <option value="小学六年级">六年级</option>
+                    </optgroup>
+                    <optgroup label="初中">
+                        <option value="初中一年级">初一</option>
+                        <option value="初中二年级">初二</option>
+                        <option value="初中三年级">初三</option>
+                    </optgroup>
+                    <optgroup label="高中">
+                        <option value="高中一年级">高一</option>
+                        <option value="高中二年级">高二</option>
+                        <option value="高中三年级">高三</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>科目</label>
+                <select id="resourceSubject">
+                    <option value="">选择科目</option>
+                    <option value="语文">语文</option>
+                    <option value="数学">数学</option>
+                    <option value="英语">英语</option>
+                    <option value="物理">物理</option>
+                    <option value="化学">化学</option>
+                    <option value="生物">生物</option>
+                    <option value="历史">历史</option>
+                    <option value="地理">地理</option>
+                    <option value="政治">政治</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>资源类型</label>
+                <select id="resourceType">
+                    <option value="">选择类型</option>
+                    <option value="视频">教学视频</option>
+                    <option value="PPT">课件PPT</option>
+                    <option value="文档">教案文档</option>
+                    <option value="习题">练习题</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>资源描述</label>
+                <textarea id="resourceDescription"></textarea>
+            </div>
+            <div class="form-group">
+                <label>上传文件</label>
+                <input type="file" id="resourceFile">
+            </div>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="hideAddModal()">取消</button>
+                <button class="save-btn" onclick="saveResource()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟资源数据
+        let resources = [
+            {
+                id: 1,
+                title: "小学数学基础运算视频教程",
+                grade: "小学一年级",
+                subject: "数学",
+                type: "视频",
+                description: "详细讲解十以内的加减法运算",
+                uploadDate: "2024-03-15",
+                downloads: 156,
+                imageUrl: "https://picsum.photos/300/200"
+            },
+            {
+                id: 2,
+                title: "初中物理力学知识点PPT",
+                grade: "初中二年级",
+                subject: "物理",
+                type: "PPT",
+                description: "牛顿运动定律详解",
+                uploadDate: "2024-03-14",
+                downloads: 89,
+                imageUrl: "https://picsum.photos/300/200"
+            },
+            {
+                id: 3,
+                title: "高中化学元素周期表教案",
+                grade: "高中一年级",
+                subject: "化学",
+                type: "文档",
+                description: "元素周期表的规律性和应用",
+                uploadDate: "2024-03-13",
+                downloads: 245,
+                imageUrl: "https://picsum.photos/300/200"
+            }
+        ];
+
+        // 渲染资源列表
+        function renderResources(filteredResources = resources) {
+            const grid = document.getElementById('resourcesGrid');
+            grid.innerHTML = filteredResources.map(resource => `
+                <div class="resource-card">
+                    <img src="${resource.imageUrl}" alt="${resource.title}" class="resource-image">
+                    <div class="resource-info">
+                        <h3 class="resource-title">${resource.title}</h3>
+                        <div class="resource-meta">
+                            <span>上传时间：${resource.uploadDate}</span>
+                            <span>下载次数：${resource.downloads}</span>
+                        </div>
+                        <div class="resource-tags">
+                            <span class="tag">${resource.grade}</span>
+                            <span class="tag">${resource.subject}</span>
+                            <span class="tag">${resource.type}</span>
+                        </div>
+                        <p>${resource.description}</p>
+                        <div class="resource-actions">
+                            <button class="action-btn preview-btn" onclick="previewResource(${resource.id})">预览</button>
+                            <button class="action-btn download-btn" onclick="downloadResource(${resource.id})">下载</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 过滤资源
+        function filterResources() {
+            const grade = document.getElementById('gradeSelect').value;
+            const subject = document.getElementById('subjectSelect').value;
+            const type = document.getElementById('typeSelect').value;
+
+            let filtered = resources;
+
+            if (grade) {
+                filtered = filtered.filter(r => r.grade === grade);
+            }
+            if (subject) {
+                filtered = filtered.filter(r => r.subject === subject);
+            }
+            if (type) {
+                filtered = filtered.filter(r => r.type === type);
+            }
+
+            renderResources(filtered);
+        }
+
+        // 清空筛选条件
+        function clearFilters() {
+            document.getElementById('gradeSelect').value = '';
+            document.getElementById('subjectSelect').value = '';
+            document.getElementById('typeSelect').value = '';
+            renderResources();
+        }
+
+        // 显示添加资源模态框
+        function showAddModal() {
+            document.getElementById('addModal').style.display = 'flex';
+        }
+
+        // 隐藏添加资源模态框
+        function hideAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+            clearForm();
+        }
+
+        // 清空表单
+        function clearForm() {
+            document.getElementById('resourceTitle').value = '';
+            document.getElementById('resourceGrade').value = '';
+            document.getElementById('resourceSubject').value = '';
+            document.getElementById('resourceType').value = '';
+            document.getElementById('resourceDescription').value = '';
+            document.getElementById('resourceFile').value = '';
+        }
+
+        // 保存资源
+        function saveResource() {
+            const title = document.getElementById('resourceTitle').value;
+            const grade = document.getElementById('resourceGrade').value;
+            const subject = document.getElementById('resourceSubject').value;
+            const type = document.getElementById('resourceType').value;
+            const description = document.getElementById('resourceDescription').value;
+
+            if (!title || !grade || !subject || !type || !description) {
+                alert('请填写所有必填字段');
+                return;
+            }
+
+            const newResource = {
+                id: resources.length + 1,
+                title,
+                grade,
+                subject,
+                type,
+                description,
+                uploadDate: new Date().toISOString().split('T')[0],
+                downloads: 0,
+                imageUrl: "https://picsum.photos/300/200"
+            };
+
+            resources.push(newResource);
+            hideAddModal();
+            renderResources();
+        }
+
+        // 预览资源
+        function previewResource(id) {
+            const resource = resources.find(r => r.id === id);
+            if (resource) {
+                alert(`预览资源：${resource.title}\n这里可以实现资源预览功能`);
+            }
+        }
+
+        // 下载资源
+        function downloadResource(id) {
+            const resource = resources.find(r => r.id === id);
+            if (resource) {
+                resource.downloads++;
+                alert(`下载资源：${resource.title}\n这里可以实现资源下载功能`);
+                renderResources();
+            }
+        }
+
+        // 检查登录状态
+        function checkLogin() {
+            const teacherName = localStorage.getItem('teacherName');
+            if (!teacherName) {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('teacherName').textContent = teacherName;
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('teacherName');
+            window.location.href = 'login.html';
+        }
+
+        // 页面加载时检查登录状态
+        window.onload = function() {
+            checkLogin();
+            renderResources();
+        };
+    </script>
+</body>
+</html> 
